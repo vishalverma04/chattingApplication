@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -55,17 +59,19 @@ const LoginForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       // Form is valid, log data to console
-      console.log('Login Data:', {
-        ...formData,
-        rememberMe
-      });
-      alert('Login successful! Check the console for data.');
-      
-      // Reset form
-      setFormData({
+      const res=login(formData.email, formData.password);
+      if (res) {
+        toast.success('Login successful!');
+        setFormData({
         email: '',
         password: ''
       });
+        navigate('/'); // Redirect to home page after successful login
+      } else {
+        toast.error('Login failed. Please check your credentials.');
+      }
+      // Reset form
+      
       setRememberMe(false);
     } else {
       setErrors(newErrors);

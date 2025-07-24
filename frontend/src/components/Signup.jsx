@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import Loader from './Loader.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const SignupForm=()=> {
+  const { register,isLoading } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -66,27 +73,44 @@ const SignupForm=()=> {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
-    const newErrors = validateForm();
+    try{
+      const newErrors = validateForm();
+      if (Object.keys(newErrors).length === 0) {
+        // Form is valid, log data to console
+        console.log('Form Data:', formData);
 
-    if (Object.keys(newErrors).length === 0) {
-      // Form is valid, log data to console
-      console.log('Form Data:', formData);
-      alert('Form submitted successfully! Check the console for data.');
-      
-      // Reset form
-      setFormData({
-        fullName: '',
-        email: '',
-        password: '',
-        mobileNumber: '',
-        confirmPassword: ''
-      });
-    } else {
-      setErrors(newErrors);
+      const response = await register(formData);
+      if (response.success === true) {
+        toast.success('Registration successfully');
+          setFormData({
+          fullName: '',
+          email: '',
+          password: '',
+          mobileNumber: '',
+          confirmPassword: ''
+        });
+        navigator('/');
+          } else {
+            toast.error(response.message || 'Registration failed. Please try again.');
+          }
+        } else {
+        // Set errors if validation fails
+        setErrors(newErrors);
+        toast.error('Please fix the errors in the form.');
+        console.error('Validation errors:', newErrors);
+        return;
+      }
     }
-  };
+  catch (error) {
+    console.error('Error submitting form:', error);
+  }
+};
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

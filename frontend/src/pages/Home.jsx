@@ -15,9 +15,12 @@ import {
 
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isLoggedIn } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -26,71 +29,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0">
-              <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                ChatHub
-              </Link>
-            </div>
-            
-            {/* Desktop Menu */}
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-8">
-                <Link to="/" className="text-blue-600 hover:text-blue-800 px-3 py-2 text-sm font-medium transition-colors">
-                  Home
-                </Link>
-                <Link to="/chat" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
-                  Chat
-                </Link>
-                <Link to="/video-call" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
-                  Video Call
-                </Link>
-                <Link to="/about" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
-                  About
-                </Link>
-                <Link to="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Login/Register
-                </Link>
-              </div>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={toggleMenu}
-                className="text-gray-600 hover:text-blue-600 p-2"
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
-              <a href="#" className="text-blue-600 block px-3 py-2 text-base font-medium">
-                Home
-              </a>
-              <a href="#" className="text-gray-600 hover:text-blue-600 block px-3 py-2 text-base font-medium">
-                Chat
-              </a>
-              <a href="#" className="text-gray-600 hover:text-blue-600 block px-3 py-2 text-base font-medium">
-                Video Call
-              </a>
-              <a href="#" className="text-gray-600 hover:text-blue-600 block px-3 py-2 text-base font-medium">
-                About
-              </a>
-              <a href="#" className="bg-blue-600 text-white block px-3 py-2 text-base font-medium rounded-lg mx-3 mt-2">
-                Login/Register
-              </a>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
@@ -105,7 +44,7 @@ const HomePage = () => {
             Experience seamless communication with our modern chat platform. Connect with friends, 
             join group conversations, and make video calls all in one place.
           </p>
-          <Link to="/chat" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
+          <Link to={isLoggedIn ? "/chat" : "/login"} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
             Start Chatting
             <ArrowRight size={20} />
           </Link>

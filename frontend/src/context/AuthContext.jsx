@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
-import Loader from '../pages/Loader';
+import Loader from '../components/Loader.jsx';
 import { useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
-const API_URL =  'http://localhost:5000';
+const API_URL =  'http://localhost:4000';
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(null);
@@ -22,14 +22,14 @@ export const AuthProvider = ({ children }) => {
         email,
         password
       });
-      const response=data.data;
-      if (data.statusCode===200) {
-        setAuth(response.jwttoken); // Save the token in state
+      console.log("Login response:", data);
+      if (data.success==true) {
+        setAuth(data.jwttoken); // Save the token in state
         setIsLoggedIn(true)
-        localStorage.setItem('authToken', response.jwttoken);
-        localStorage.setItem('user',JSON.stringify(response.user))
-        setLoggedInUser(response.user)
-        localStorage.setItem("userId",response.user.userId)
+        localStorage.setItem('authToken', data.jwttoken);
+        localStorage.setItem('user',JSON.stringify(data.user))
+        setLoggedInUser(data.user)
+        localStorage.setItem("userId",data.user.userId)
         return true;
       } else {
         setIsLoggedIn(false)
@@ -48,14 +48,20 @@ export const AuthProvider = ({ children }) => {
       if (!token) {
         return false;
       }
-      const { data } = await axios.get('/api/v1/users/isLoggedIn', {
+      const { data } = await axios.get(`${API_URL}/api/users/isLoggedIn`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      if (data.statusCode === 200) {
+      console.log("isLoggedIn response:", data);
+      if (data.success == true) {
         setIsLoggedIn(true)
-        setLoggedInUser(JSON.parse(localStorage.getItem('user')))
+        setLoggedInUser(data.user)
+        localStorage.setItem('userId', data.user.userId);
+        setLoggedInUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      
+        
         return true;
       } else {
         localStorage.removeItem('authToken');
@@ -71,6 +77,31 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
   }
+
+  const register = async (formData) => {
+    setIsLoading(true);
+    setAuth(null);
+    try {
+      const { data } = await axios.post(`${API_URL}/api/users/register`, formData);
+      if (data.success === true) {
+        toast.success('Registration successfully');
+        setAuth(data.jwttoken);
+        localStorage.setItem('authToken', data.jwttoken);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/');
+        return data;
+        
+      } else {
+        toast.error(data.message || 'Registration failed. Please try again.');
+        return data;
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Something went wrong.');
+      throw error;
+    }finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -89,7 +120,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout,isLoggedIn ,loggedInUser}}>
+    <AuthContext.Provider value={{ auth, login, logout,isLoggedIn ,loggedInUser,register}}>
      {isLoading ? <Loader /> : children}
     </AuthContext.Provider>
   );

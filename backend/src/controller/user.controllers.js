@@ -9,16 +9,16 @@ const options={
 
 const RegisterUser = asyncHander(async (req, res) => {
   try {
-    const { fullName, email, mobile, password, description } = req.body;
+    const { fullName, email, mobileNumber, password, description } = req.body;
 
     // Check required fields
-    if (!fullName || !email || !mobile || !password) {
+    if (!fullName || !email || !mobileNumber || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
     // Check if email or mobile already exists
     const existingUser = await User.findOne({
-      $or: [{ email }, { mobile }],
+      $or: [{ email }, { mobileNumber }],
     });
 
     if (existingUser) {
@@ -29,7 +29,7 @@ const RegisterUser = asyncHander(async (req, res) => {
     const user = await User.create({
       fullName,
       email,
-      mobile,
+      mobileNumber,
       password,
       description,
     });
@@ -45,7 +45,7 @@ const RegisterUser = asyncHander(async (req, res) => {
       success: true,
       message: 'User registered successfully',
       user: userData,
-      token,
+      jwttoken: token,
     });
 
   } catch (error) {
@@ -84,20 +84,36 @@ const LoginUser = asyncHander(async (req, res) => {
        mobileNumber:user.mobileNumber,
        joinDate:user.createdAt.toISOString().split('T')[0]
     }
-  
-     
      //send response
         res.status(200).cookie("token",jwttoken,options).json({
         success:true,
         message:"user logged in successfully",
         user:loggedInUser,
-        token:jwttoken
+        jwttoken
         });
 
    } catch (error) {
         res.status(error.statusCode).json({ message: error.message });
    } 
  });
+
+ const isLoggedIn=asyncHander(async (req,res)=>{
+  
+  const decodedToken=req?.decodedToken;
+  
+  if(!decodedToken){
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  const user=req?.user;
+  return res.status(200).json({
+    success:true,
+    message:"User is logged in",
+    decodedToken,
+    user
+  });
+
+});
+
 
  const getAllUsers = asyncHander(async (req, res) => {
   try {
@@ -142,5 +158,6 @@ export {
     RegisterUser, 
     LoginUser,
     getAllUsers,
-    searchedUsers
+    searchedUsers,
+    isLoggedIn
 };
