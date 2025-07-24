@@ -30,15 +30,15 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user',JSON.stringify(data.user))
         setLoggedInUser(data.user)
         localStorage.setItem("userId",data.user.userId)
-        return true;
+        return data;
       } else {
         setIsLoggedIn(false)
-        return false;
+        return data;
       }
     } catch (error) {
       setIsLoggedIn(false)
       toast.error(error.response?.data?.message || "Something went wrong.");
-      return false;
+      return error.response?.data || { success: false, message: 'Login failed' };
     }
   };
 
@@ -53,7 +53,6 @@ export const AuthProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log("isLoggedIn response:", data);
       if (data.success == true) {
         setIsLoggedIn(true)
         setLoggedInUser(data.user)

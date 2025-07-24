@@ -58,21 +58,22 @@ const LoginForm = () => {
     const newErrors = validateForm();
 
     if (Object.keys(newErrors).length === 0) {
-      // Form is valid, log data to console
-      const res=login(formData.email, formData.password);
-      if (res) {
-        toast.success('Login successful!');
-        setFormData({
-        email: '',
-        password: ''
-      });
-        navigate('/'); // Redirect to home page after successful login
-      } else {
-        toast.error('Login failed. Please check your credentials.');
-      }
-      // Reset form
       
-      setRememberMe(false);
+      const response=login(formData.email, formData.password)
+
+      response.then(data => {
+        if (data.success) {
+           toast.success(data.message || 'Login successful');
+           setFormData({ email: '', password: '' });
+           navigate('/'); // Redirect to dashboard or home page
+        } else {
+           toast.error(data.message || 'Login failed');
+        }
+      }).catch(error => {
+        console.error('Login error:', error);
+        toast.error(error.message || 'An error occurred during login');
+      });
+
     } else {
       setErrors(newErrors);
     }
