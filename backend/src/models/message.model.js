@@ -11,10 +11,10 @@ const messageSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
-    file: {
+    file: [{
       type: String, // URL to uploaded file
       default: ''
-    },
+    }],
     chat: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Chat',
