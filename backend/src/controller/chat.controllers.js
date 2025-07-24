@@ -3,11 +3,14 @@ import { Chat } from '../models/chat.model.js';
 import { User } from '../models/user.model.js';
 
 const accessChat = asyncHander(async (req, res) => {
-    const { userId } = req.body;
-
-
+  const { userId } = req.body;
   if (!userId) {
     return res.status(400).json({ message: "UserId param not sent" });
+  }
+
+  const user= await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
   }
 
   try {
@@ -26,8 +29,9 @@ const accessChat = asyncHander(async (req, res) => {
     if (chat) return res.status(200).json(chat);
 
     const createdChat = await Chat.create({
-      chatName: "sender",
+      chatName: user.fullName,
       isGroupChat: false,
+      avatar: user.avatar,
       users: [req.user._id, userId],
     });
 
@@ -43,8 +47,9 @@ const accessChat = asyncHander(async (req, res) => {
 });
 
 const fetchChats = asyncHander(async (req, res) => {
+   const userId=req.params.userId;
     try {
-    let chats = await Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+    let chats = await Chat.find({ users: { $elemMatch: { $eq: userId } } })
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
       .populate("latestMessage")

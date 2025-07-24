@@ -6,12 +6,15 @@ import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { ChatProvider } from './context/ChatContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-      <App />
+        <ChatProvider>
+          <App />
+        </ChatProvider>
       </AuthProvider>
       <Toaster />
     </BrowserRouter>
